@@ -1,3 +1,12 @@
+/*
+  For non-Route 53 DNS validation
+
+  Before a full apply, run the 1st pass as:
+    terraform apply -target=aws_acm_certificate.preview
+    terraform output acm_validation_records
+  
+  Then add CNAME/Value pairs to the DNS record before the full terraform apply.
+*/
 resource "aws_acm_certificate" "preview" {
   provider = aws.us_east_1
 
