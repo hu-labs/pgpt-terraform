@@ -1,14 +1,8 @@
 // Declaration of variables
 variable "aws_region" {
-  description = "Main AWS region for PromptGPT app resources."
+  description = "Main AWS region for app resources."
   type        = string
   default     = "eu-west-2"
-}
-
-variable "environment" {
-  description = "Environment name for this Terraform deployment."
-  type        = string
-  default     = "preview"
 }
 
 variable "project" {
@@ -17,16 +11,24 @@ variable "project" {
   default     = "promptgpt"
 }
 
-variable "preview_domain" {
-  description = "Public preview domain for CloudFront."
+variable "environment" {
+  description = "Deployment environment/copy name, such as preview or production."
   type        = string
-  default     = "preview-promptgpt.umezawa.info"
+}
+
+variable "name_prefix" {
+  description = "Resource name prefix for this deployment copy."
+  type        = string
+}
+
+variable "public_domain" {
+  description = "Public CloudFront hostname for this deployment copy."
+  type        = string
 }
 
 variable "frontend_bucket_name" {
-  description = "S3 bucket for the preview frontend."
+  description = "S3 bucket name for this deployment's frontend."
   type        = string
-  default     = "promptgpt-preview-frontend"
 }
 
 variable "openai_secret_name" {
@@ -54,7 +56,6 @@ variable "backend_repo" {
 }
 
 variable "github_environment" {
-  description = "GitHub Environment name used by deployment workflows."
+  description = "GitHub Environment name allowed to assume this deployment's AWS roles."
   type        = string
-  default     = "preview"
 }
