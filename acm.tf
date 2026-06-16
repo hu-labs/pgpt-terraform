@@ -7,10 +7,10 @@
   
   Then add CNAME/Value pairs to the DNS record before the full terraform apply.
 */
-resource "aws_acm_certificate" "preview" {
+resource "aws_acm_certificate" "site" {
   provider = aws.us_east_1
 
-  domain_name       = var.preview_domain
+  domain_name       = var.public_domain
   validation_method = "DNS"
 
   lifecycle {
@@ -20,13 +20,13 @@ resource "aws_acm_certificate" "preview" {
   tags = local.common_tags
 }
 
-resource "aws_acm_certificate_validation" "preview" {
+resource "aws_acm_certificate_validation" "site" {
   provider = aws.us_east_1
 
-  certificate_arn = aws_acm_certificate.preview.arn
+  certificate_arn = aws_acm_certificate.site.arn
 
   validation_record_fqdns = [
-    for dvo in aws_acm_certificate.preview.domain_validation_options : dvo.resource_record_name
+    for dvo in aws_acm_certificate.site.domain_validation_options : dvo.resource_record_name
   ]
 }
 
