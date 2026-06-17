@@ -6,7 +6,7 @@ resource "aws_cloudwatch_log_group" "lambda" {
 }
 
 resource "aws_iam_role" "lambda_exec" {
-  name = "${local.name_prefix}-lambda-exec-role"
+  name = "${var.name_prefix}-lambda-exec-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -25,7 +25,7 @@ resource "aws_iam_role" "lambda_exec" {
 }
 
 resource "aws_iam_role_policy" "lambda_logs" {
-  name = "${local.name_prefix}-lambda-logs"
+  name = "${var.name_prefix}-lambda-logs"
   role = aws_iam_role.lambda_exec.id
 
   policy = jsonencode({
@@ -53,7 +53,7 @@ data "aws_secretsmanager_secret" "openai" {
 }
 
 resource "aws_iam_role_policy" "openai_secret_read" {
-  name = "${local.name_prefix}-openai-secret-read"
+  name = "${var.name_prefix}-openai-secret-read"
   role = aws_iam_role.lambda_exec.id
 
   policy = jsonencode({

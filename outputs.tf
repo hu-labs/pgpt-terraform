@@ -1,7 +1,7 @@
 output "acm_validation_records" {
-  description = "Create these DNS records in Squarespace to validate the CloudFront certificate."
+  description = "Create these DNS records in external DNS to validate the CloudFront certificate."
   value = {
-    for dvo in aws_acm_certificate.preview.domain_validation_options : dvo.domain_name => {
+    for dvo in aws_acm_certificate.site.domain_validation_options : dvo.domain_name => {
       name  = dvo.resource_record_name
       type  = dvo.resource_record_type
       value = dvo.resource_record_value
@@ -9,16 +9,24 @@ output "acm_validation_records" {
   }
 }
 
+output "environment" {
+  value = var.environment
+}
+
+output "name_prefix" {
+  value = var.name_prefix
+}
+
 output "public_domain" {
   value = var.public_domain
 }
 
 output "cloudfront_domain_name" {
-  value = aws_cloudfront_distribution.preview.domain_name
+  value = aws_cloudfront_distribution.site.domain_name
 }
 
 output "cloudfront_distribution_id" {
-  value = aws_cloudfront_distribution.preview.id
+  value = aws_cloudfront_distribution.site.id
 }
 
 output "frontend_bucket_name" {

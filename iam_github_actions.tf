@@ -2,10 +2,11 @@ data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
+/*
 locals {
   frontend_repo_full_name = "${var.github_org}/${var.frontend_repo}"
   backend_repo_full_name  = "${var.github_org}/${var.backend_repo}"
-}
+}*/
 
 /*
     IAM roles for GitHub Actions
@@ -63,12 +64,12 @@ resource "aws_iam_role_policy" "frontend_deploy" {
         Resource = "${aws_s3_bucket.frontend.arn}/*"
       },
       {
-        Sid    = "InvalidatePreviewCloudFront"
+        Sid    = "InvalidateSiteCloudFront"
         Effect = "Allow"
         Action = [
           "cloudfront:CreateInvalidation"
         ]
-        Resource = aws_cloudfront_distribution.preview.arn
+        Resource = aws_cloudfront_distribution.site.arn
       }
     ]
   })

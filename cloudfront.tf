@@ -18,6 +18,7 @@ resource "aws_cloudfront_origin_access_control" "frontend" {
   signing_protocol                  = "sigv4"
 }
 
+// CF Fuction
 resource "aws_cloudfront_function" "rewrite_api_v1_to_prod" {
   name    = "${var.name_prefix}-rewrite-api-v1-to-prod"
   runtime = "cloudfront-js-2.0"

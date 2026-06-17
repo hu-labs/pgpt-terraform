@@ -20,6 +20,7 @@ resource "aws_acm_certificate" "site" {
   tags = local.common_tags
 }
 
+// This can 'hang' if the DNS records aren't created yet, until it is validated or time out
 resource "aws_acm_certificate_validation" "site" {
   provider = aws.us_east_1
 

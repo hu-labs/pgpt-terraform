@@ -1,18 +1,14 @@
-(PLACEHOLDER README)
-
-# Terraform Repository
+# Terraform for PromptGPT
 
 ## Overview
 
-This repository contains Terraform configurations for infrastructure as code (IaC) deployment.
+This repository contains Terraform configurations for infrastructure as code (IaC) deployment of PromptGPT.
 
 ## Structure
 
 - `main.tf` - Main Terraform configuration
 - `variables.tf` - Variable definitions
 - `outputs.tf` - Output definitions
-- `terraform.tfstate` - Terraform state file
-- `terraform.tfstate.backup` - Backup of Terraform state
 
 ## Getting Started
 
@@ -23,20 +19,41 @@ This repository contains Terraform configurations for infrastructure as code (Ia
 
 ### Usage
 
-1. Initialize Terraform:
-   ```bash
+* Initialize & validate:
+   ```
    terraform init
+   terraform fmt
+   terraform validate
+   ```
+* For a non-R53 DNS, run ACM certificate first:
+   ```
+   terraform plan \
+   -state=envs/state/production.tfstate \
+   -var-file=envs/production.tfvars \
+   -target=aws_acm_certificate.site \
+   -out=cert.tfplan
+   ```
+   Review, then:
+   ```
+   terraform apply cert.tfplan
+   ```
+   * Output the validation record if it hasn't:
+      ```
+      terraform output \
+         -state=envs/state/preview.tfstate \
+         acm_validation_records
+      ```
+   Ensure DNS is set and certificate is live.
+* A full run:   
+   ```
+   terraform plan \
+   -state=envs/state/production.tfstate \
+   -var-file=envs/production.tfvars \
+   -out=full.tfplan
+
+   terraform apply full.tfplan
    ```
 
-2. Plan the deployment:
-   ```bash
-   terraform plan
-   ```
-
-3. Apply the configuration:
-   ```bash
-   terraform apply
-   ```
 
 ## Documentation
 

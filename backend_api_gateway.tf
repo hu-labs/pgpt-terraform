@@ -126,7 +126,7 @@ resource "aws_api_gateway_integration_response" "options_200" {
 }
 
 /*
-    Deployment, stages, method settings
+    Deployment
 */
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
@@ -153,7 +153,9 @@ resource "aws_api_gateway_deployment" "deployment" {
     aws_lambda_permission.allow_prod_api_gateway,
   ]
 }
-
+/*
+    Stages
+*/
 resource "aws_api_gateway_stage" "test" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   deployment_id = aws_api_gateway_deployment.deployment.id
@@ -174,12 +176,14 @@ resource "aws_api_gateway_stage" "prod" {
 
   variables = {
     lambdaAlias   = aws_lambda_alias.stable.name
-    allowedOrigin = "https://${var.preview_domain}"
+    allowedOrigin = "https://${var.public_domain}"
   }
 
   tags = local.common_tags
 }
-
+/*
+    Method settings
+*/
 resource "aws_api_gateway_method_settings" "test_all_methods" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   stage_name  = aws_api_gateway_stage.test.stage_name
@@ -207,7 +211,6 @@ resource "aws_api_gateway_method_settings" "prod_all_methods" {
     throttling_rate_limit  = 10000
   }
 }
-
 /*
     Usage plan and API key
 */
