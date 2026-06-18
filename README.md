@@ -80,10 +80,19 @@ For the first deployment:
 
    terraform apply full.tfplan
    ```
-For other deployments beyond the 1st, use the appropriate backend config file with ```reconfigure``` flag:
-```
-terraform init -reconfigure -backend-config=envs/deploy_name.hcl
-```
+* For other deployments beyond the 1st, use the appropriate backend config file with ```reconfigure``` flag:
+   ```
+   terraform init -reconfigure -backend-config=envs/deploy_name.hcl
+   ```
+* To destroy:
+   ```
+   terraform plan \
+   -destroy \
+   -var-file=envs/deploy_name.tfvars \
+   -out=destroy-preview.tfplan
+
+   terraform apply destroy-preview.tfplan
+   ```
 
 ## Documentation
 
