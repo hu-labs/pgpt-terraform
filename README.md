@@ -47,7 +47,7 @@ openai_secret_name = "openai/api-key"
 
 * Initialize (with backend config file)
    ```
-   terraform init -reconfigure -backend-config=envs/deploy_name.backend.hcl
+   terraform init -backend-config=envs/deploy_name.backend.hcl
    ```
 * Validate:
    ```
