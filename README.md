@@ -45,6 +45,8 @@ openai_secret_name = "openai/api-key"
 
 ### Usage
 
+For the first deployment:
+
 * Initialize (with backend config file)
    ```
    terraform init -backend-config=envs/deploy_name.backend.hcl
@@ -67,9 +69,7 @@ openai_secret_name = "openai/api-key"
    ```
    * Output the validation record if it hasn't:
       ```
-      terraform output \
-         -state=envs/state/deploy_name.tfstate \
-         acm_validation_records
+      terraform output acm_validation_records
       ```
    Ensure DNS is set and certificate is live.
 * A full run:   
@@ -80,6 +80,10 @@ openai_secret_name = "openai/api-key"
 
    terraform apply full.tfplan
    ```
+For other deployments beyond the 1st, use the appropriate backend config file with ```reconfigure``` flag:
+```
+terraform init -reconfigure -backend-config=envs/deploy_name.hcl
+```
 
 ## Documentation
 
