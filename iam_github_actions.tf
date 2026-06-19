@@ -128,10 +128,13 @@ resource "aws_iam_role_policy" "backend_deploy" {
           "lambda:GetAlias",
           "lambda:UpdateAlias"
         ]
+        /* Apparently, AWS evaluates UpdateAlias against the function ARN, not the alias ARN
         Resource = [
           "${aws_lambda_function.backend.arn}:${aws_lambda_alias.test.name}",
           "${aws_lambda_function.backend.arn}:${aws_lambda_alias.stable.name}"
-        ]
+        ]*/
+        
+        Resource = aws_lambda_function.backend.arn
       }
     ]
   })
