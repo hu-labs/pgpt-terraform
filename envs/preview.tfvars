@@ -3,7 +3,7 @@ aws_region = "eu-west-2"
 project      = "promptgpt"
 environment  = "preview"
 name_prefix  = "promptgpt-preview"
-public_domain = "preview-promptgpt.umezawa.info"
+public_domain = "promptgpt-preview.umezawa.info"
 
 frontend_bucket_name = "promptgpt-preview-frontend"
 

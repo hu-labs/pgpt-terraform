@@ -32,10 +32,17 @@ resource "aws_cloudfront_distribution" "site" {
   is_ipv6_enabled     = true
   comment             = "PromptGPT site distribution"
   default_root_object = "index.html"
-  price_class         = "PriceClass_100"
+  price_class         = "PriceClass_All"
 
   aliases = [var.public_domain]
 
+  // Pricing Plan tolerance
+  lifecycle {
+    ignore_changes = [
+      price_class,
+      web_acl_id,
+    ]
+  }
   origin {
     origin_id                = local.frontend_origin
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name

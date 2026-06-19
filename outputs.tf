@@ -77,3 +77,4 @@ output "frontend_github_role_arn" {
 output "backend_github_role_arn" {
   value = aws_iam_role.backend_deploy.arn
 }
+
