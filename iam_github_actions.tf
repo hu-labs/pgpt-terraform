@@ -122,6 +122,14 @@ resource "aws_iam_role_policy" "backend_deploy" {
         Resource = aws_lambda_function.backend.arn
       },
       {
+        Sid    = "ReadLambdaVersions"
+        Effect = "Allow"
+        Action = [
+          "lambda:GetFunction"
+        ]
+        Resource = "${aws_lambda_function.backend.arn}:*"
+      },
+      {
         Sid    = "ManageLambdaAliases"
         Effect = "Allow"
         Action = [
