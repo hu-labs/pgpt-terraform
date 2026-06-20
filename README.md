@@ -4,12 +4,23 @@
 
 This repository contains Terraform configurations for infrastructure as code (IaC) deployment of PromptGPT.
 
+Frontend / backend code is shipped through CI/CD in their respective repository.
+
 ## Structure
-
-- `main.tf` - Main Terraform configuration
-- `variables.tf` - Variable definitions
-- `outputs.tf` - Output definitions
-
+```
+acm.tf
+backend_api_gateway.tf
+backend_lambda.tf
+backend.tf
+cloudfront.tf
+frontend_s3.tf
+iam_github_actions.tf
+iam_lambda.tf
+locals.tf
+outputs.tf
+providers.tf
+variables.tf
+```
 ## Getting Started
 
 ### Prerequisites
@@ -42,7 +53,6 @@ github_environment = "production"
 
 openai_secret_name = "openai/api-key"
 ```
-
 ### Usage
 
 For the first deployment:
@@ -98,10 +108,22 @@ For the first deployment:
 
 For detailed information about the infrastructure configuration, see individual `.tf` files.
 
-## Contributing
+## Product Lifecycle
+Terraform manages the infra.
 
-Placeholder for contribution guidelines.
+Frontend / backend code is shipped through CI/CD from their respective repos.
+```
+Frontend:
+  Deploy Frontend
+  Rollback Frontend by run_id
 
-## License
+Backend:
+  Deploy Backend
+  Promote Backend (Save an immutable lambda version and point the production Alias to it)
+  Rollback Backend by target version
 
-Placeholder for license information.
+Terraform:
+  envs/deploy_name.tfvars
+  envs/deploy_name.backend.hcl
+  envs/state/deploy_name.tfstate
+```
