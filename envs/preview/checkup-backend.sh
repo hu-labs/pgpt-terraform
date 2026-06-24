@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 echo "--- Backend STABLE Alias & Version ---"
 aws lambda get-alias \
   --function-name "$(terraform output -raw lambda_function_name)" \

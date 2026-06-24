@@ -42,3 +42,31 @@ output "frontend_github_role_arn" {
 output "backend_github_role_arn" {
   value = module.promptgpt.backend_github_role_arn
 }
+
+output "api_gateway_id" {
+  value = module.promptgpt.api_gateway_id
+}
+
+output "api_gateway_prod_url" {
+  value = module.promptgpt.api_gateway_prod_url
+}
+
+output "cloudfront_domain_name" {
+  value = module.promptgpt.cloudfront_domain_name
+}
+
+output "environment" {
+  value = module.promptgpt.environment
+}
+
+output "name_prefix" {
+  value = module.promptgpt.name_prefix
+}
+
+output "public_domain" {
+  value = module.promptgpt.public_domain
+}
+
+output "vite_api_url" {
+  value = module.promptgpt.vite_api_url
+}
