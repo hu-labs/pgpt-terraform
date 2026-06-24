@@ -25,12 +25,6 @@ provider "aws" {
   region = "us-east-1"
 }
 
-locals {
-  project     = "promptgpt"
-  environment = "production"
-  name_prefix = "${local.project}-${local.environment}"
-}
-
 // Root module
 module "promptgpt" {
   source = "../../modules/promptgpt-stack"
