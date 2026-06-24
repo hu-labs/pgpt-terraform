@@ -11,28 +11,25 @@ Frontend / backend code is shipped through CI/CD in their respective repository.
 pgpt-terraform/
   modules/
     promptgpt-stack/
-      versions.tf
-      providers.tf
-      variables.tf
-      locals.tf
-      outputs.tf
+      cloudfront/
+      lambda-placeholder/
       acm.tf
-      frontend_s3.tf
       backend_api_gateway.tf
       backend_lambda.tf
-      iam_lambda.tf
-      iam_github_actions.tf
       cloudfront.tf
+      frontend_s3.tf
+      iam_github_actions.tf
+      iam_lambda.tf
+      locals.tf
+      outputs.tf
+      variables.tf
+      versions.tf
 
   envs/
     deploy_name/
-      main.tf
-      outputs.tf
-      terraform.tfvars
-      backend.hcl
-      .terraform.lock.hcl
-      terraform.tfstate             # secure
-      .terraform/                   # secure
+      main.tf                 => customize
+      outputs.tf              => customize
+      backend.hcl             => constant
 ```
 ## Getting Started
 
@@ -42,30 +39,12 @@ pgpt-terraform/
 - AWS CLI configured with appropriate credentials
 
 ### Prepare project specific files
-For each deployment, create ```env/deploy_name.tfvars``` and ```env/deploy_name.backend.hcl```.
+* ```backend.hcl```:
+   ```
+   path = "terraform.tfstate"
+   ```
+* Customize ```main.tf``` and ```outputs.tf```.
 
-```env/deploy_name.backend.hcl```:
-```
-path = "envs/state/preview.tfstate"
-```
-```env/deploy_name.tfvars```:
-```
-aws_region = "eu-west-2"
-
-project      = "project_name"
-environment  = "production"
-name_prefix  = "tag-prefix"
-public_domain = "production-name.domain.com"
-
-frontend_bucket_name = "name-production-frontend"
-
-github_org         = "gh-name"
-frontend_repo      = "name-frontend"
-backend_repo       = "name-backend-lambda"
-github_environment = "production"
-
-openai_secret_name = "openai/api-key"
-```
 ### Usage
 * Initialize Terraform from the new preview root
    ```
@@ -82,7 +61,7 @@ openai_secret_name = "openai/api-key"
    terraform fmt
    terraform validate
    ```
-* For a non-R53 DNS, run ACM certificate first:
+* CloudFront: for a non-R53 DNS, run ACM block first:
    ```
    terraform plan \
       -target=module.promptgpt.aws_acm_certificate.site \
@@ -92,11 +71,14 @@ openai_secret_name = "openai/api-key"
    ```
    terraform apply cert.tfplan
    ```
-   * Output the validation record if it hasn't:
+   * Output the validation record if not shown:
       ```
       terraform output acm_validation_records
       ```
-   Ensure DNS is set and certificate is live.
+      Set DNS CName and check certificate is issued:
+      ```
+      aws acm list-certificates --region us-east-1 --query "CertificateSummaryList[*].[DomainName,Status]"
+      ```
 * A full run:   
    ```
    terraform plan -out=full.tfplan
