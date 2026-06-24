@@ -5,6 +5,7 @@
 *.tfplan
 crash.log
 crash.*.log
+
 override.tf
 override.tf.json
 *_override.tf
@@ -12,7 +13,7 @@ override.tf.json
 
 lambda-placeholder.zip
 
-*.md
+docs/
 _old/
 
 response.json

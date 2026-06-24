@@ -5,6 +5,10 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 6.0"
+
+      configuration_aliases = [
+        aws.us_east_1
+      ]
     }
 
     archive = {
@@ -17,13 +21,4 @@ terraform {
       version = "~> 3.7"
     }
   }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
-
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
 }
