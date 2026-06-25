@@ -3,12 +3,6 @@ data "aws_iam_openid_connect_provider" "github" {
 }
 
 /*
-locals {
-  frontend_repo_full_name = "${var.github_org}/${var.frontend_repo}"
-  backend_repo_full_name  = "${var.github_org}/${var.backend_repo}"
-}*/
-
-/*
     IAM roles for GitHub Actions
 */
 resource "aws_iam_role" "frontend_deploy" {
@@ -141,7 +135,7 @@ resource "aws_iam_role_policy" "backend_deploy" {
           "${aws_lambda_function.backend.arn}:${aws_lambda_alias.test.name}",
           "${aws_lambda_function.backend.arn}:${aws_lambda_alias.stable.name}"
         ]*/
-        
+
         Resource = aws_lambda_function.backend.arn
       }
     ]

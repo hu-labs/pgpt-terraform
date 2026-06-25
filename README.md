@@ -2,9 +2,15 @@
 
 ## Overview
 
-This repository contains Terraform configurations for infrastructure as code (IaC) deployment of PromptGPT.
+This repository contains Terraform configurations for infrastructure as code (IaC) deployment of PromptGPT on aws.
 
-Frontend / backend code is shipped through CI/CD in their respective repository.
+Production code (frontend & backend) is not managed or shipped by them.
+
+## Modules
+
+```promptgpt-stack``` is the main module 
+
+```github-actions-env``` is a helper module that may optionally be used to inject environment variables into GitHub repos, for shipping frontend/backend code. See README in its folder for setup.
 
 ## Structure
 ```
@@ -90,7 +96,7 @@ pgpt-terraform/
    terraform apply destroy.tfplan
    ```
 
-## Product Lifecycle
+## Product Lifecycle (PGPT)
 Terraform manages the infra.
 
 Frontend / backend code is shipped through CI/CD from their respective repos.
