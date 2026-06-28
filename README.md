@@ -17,8 +17,8 @@ Production code (frontend & backend) is not managed or shipped by them.
 pgpt-terraform/
   modules/
     promptgpt-stack/
-      cloudfront/
-      lambda-placeholder/
+      cloudfront/rewrite-api-v1-to-prod.js
+      lambda-placeholder/handler.js                => dummy function
       acm.tf
       backend_api_gateway.tf
       backend_lambda.tf
@@ -28,6 +28,11 @@ pgpt-terraform/
       iam_lambda.tf
       locals.tf
       outputs.tf
+      variables.tf
+      versions.tf
+
+    github-actions-env/
+      main.tf
       variables.tf
       versions.tf
 
