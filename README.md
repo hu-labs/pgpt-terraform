@@ -8,7 +8,7 @@ Production code (frontend & backend) is not managed or shipped by them.
 
 ## Modules
 
-```promptgpt-stack``` is the main module 
+```promptgpt-stack``` is the main module.
 
 ```github-actions-env``` is a helper module that may optionally be used to inject environment variables into GitHub repos, for shipping frontend/backend code. See README in its folder for setup.
 

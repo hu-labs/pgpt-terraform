@@ -66,7 +66,7 @@ export GITHUB_TOKEN="$(gh auth token)"
 \* Note ```TEST_API_KEY``` is a secret that needs to be added manually:
 ```
 gh secret set TEST_API_KEY \
-  --repo hu-labs/pgpt-backend-lambda \
+  --repo GH_ORG/BACKEND_REPO \
   --env production \
   --body "$(terraform output -raw api_key_value)"
 ```
