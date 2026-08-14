@@ -67,6 +67,6 @@ output "public_domain" {
   value = module.promptgpt.public_domain
 }
 
-output "vite_api_url" {
-  value = module.promptgpt.vite_api_url
+output "relative_api_url" {
+  value = module.promptgpt.relative_api_url
 }

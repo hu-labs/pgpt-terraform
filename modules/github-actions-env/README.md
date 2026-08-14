@@ -2,6 +2,31 @@
 
 A helper module for GH **Environment Variables** injection for convenience, with the preset variable names for the existing GitHub Actions workflows for both the frontend and backend.
 
+## Corresponding Frontend & Backend Repository
+
+* Frontend: https://github.com/hu-labs/pgpt-frontend
+* Backend: https://github.com/hu-labs/pgpt-backend-lambda
+
+## GH Environment Variables created & owned by this module
+
+```
+frontend:
+  AWS_REGION               
+  AWS_ROLE_ARN             
+  S3_BUCKET                
+  CLOUDFRONT_DISTRIBUTION_ID
+  RELATIVE_API_URL         
+
+backend:
+  AWS_REGION               
+  AWS_BACKEND_ROLE_ARN     
+  AWS_LAMBDA_FUNCTION_NAME 
+  TEST_API_URL             
+  PUBLIC_API_URL           
+  TEST_ALIAS               
+  PROD_ALIAS               
+```
+
 ## Usage
 In a root module, include GH provider in ```terraform``` block:
 ```
@@ -31,7 +56,7 @@ locals {
     AWS_ROLE_ARN               = module.promptgpt.frontend_github_role_arn
     S3_BUCKET                  = module.promptgpt.frontend_bucket_name
     CLOUDFRONT_DISTRIBUTION_ID = module.promptgpt.cloudfront_distribution_id
-    VITE_API_URL               = module.promptgpt.vite_api_url
+    RELATIVE_API_URL           = module.promptgpt.relative_api_url
   }
 
   backend_github_variables = {
@@ -63,7 +88,7 @@ Set ```GITHUB_TOKEN``` which is used by TF GitHub provider for authentication:
 ```
 export GITHUB_TOKEN="$(gh auth token)"
 ```
-\* Note ```TEST_API_KEY``` is a secret that needs to be added manually:
+\* Note: `TEST_API_KEY` is a secret that needs to be added manually:
 ```
 gh secret set TEST_API_KEY \
   --repo GH_ORG/BACKEND_REPO \
