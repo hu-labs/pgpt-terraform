@@ -8,7 +8,7 @@ resource "aws_lambda_function" "backend" {
   function_name = local.lambda_name
   role          = aws_iam_role.lambda_exec.arn
   handler       = "handler.handler"
-  runtime       = "nodejs22.x"
+  runtime       = "nodejs24.x"
 
   filename         = data.archive_file.lambda_placeholder_zip.output_path
   source_code_hash = data.archive_file.lambda_placeholder_zip.output_base64sha256

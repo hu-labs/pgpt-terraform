@@ -61,7 +61,7 @@ output "public_api_url" {
   value = "https://${var.public_domain}/api/v1/chat"
 }
 
-output "vite_api_url" {
+output "relative_api_url" {
   value = "/api/v1/chat"
 }
 

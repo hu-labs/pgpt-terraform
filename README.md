@@ -4,13 +4,25 @@
 
 This repository contains Terraform configurations for infrastructure as code (IaC) deployment of PromptGPT on aws.
 
-Production code (frontend & backend) is not managed or shipped by them.
+Production code (frontend & backend) is managed and shipped separately.
 
 ## Modules
 
-```promptgpt-stack``` is the main module.
+- [modules/promptgpt-stack](modules/promptgpt-stack/README.md) — main infrastructure module that creates the PromptGPT AWS stack.
+- [modules/github-actions-env](modules/github-actions-env/README.md) — helper module for injecting GitHub environment variables into frontend/backend repositories.
 
-```github-actions-env``` is a helper module that may optionally be used to inject environment variables into GitHub repos, for shipping frontend/backend code. See README in its folder for setup.
+## Key AWS resources managed by this repository
+
+This Terraform repository owns and manages the core AWS resources for a PromptGPT deployment, including:
+
+- S3 frontend bucket for the static site
+- CloudFront distribution with custom domain and certificate integration
+- Origin access control and caching behaviors for frontend and API traffic
+- API Gateway REST API with `/chat` route, CORS handling, usage plan, and API key
+- Lambda function for the backend application, plus `test` and `stable` aliases
+- IAM roles and policies for Lambda execution, GitHub Actions deployment, and related access
+- ACM certificate validation records for the public CloudFront domain
+- CloudWatch log groups for Lambda logging
 
 ## Structure
 ```
@@ -28,6 +40,11 @@ pgpt-terraform/
       iam_lambda.tf
       locals.tf
       outputs.tf
+      variables.tf
+      versions.tf
+   github-actions-env/
+      main.tf
+      README.md
       variables.tf
       versions.tf
 
@@ -104,7 +121,7 @@ pgpt-terraform/
 ## Product Lifecycle (PGPT)
 Terraform manages the infra.
 
-Frontend / backend code is shipped through CI/CD from their respective repos.
+Frontend / backend code is shipped through CI/CD from their respective repositories.
 ```
 Frontend:
   Deploy Frontend

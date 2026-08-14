@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.10.0"
+  required_version = ">= 1.10.0, < 2.0.0"
 
   backend "local" {}
 
@@ -28,7 +28,7 @@ provider "github" { // For GHA helper module
   owner = "hu-labs"
 }
 
-// Root, main module
+// Root module
 module "promptgpt" {
   source = "../../modules/promptgpt-stack"
 
@@ -59,7 +59,7 @@ locals {
     AWS_ROLE_ARN               = module.promptgpt.frontend_github_role_arn
     S3_BUCKET                  = module.promptgpt.frontend_bucket_name
     CLOUDFRONT_DISTRIBUTION_ID = module.promptgpt.cloudfront_distribution_id
-    VITE_API_URL               = module.promptgpt.vite_api_url
+    RELATIVE_API_URL           = module.promptgpt.relative_api_url
   }
 
   backend_github_variables = {
