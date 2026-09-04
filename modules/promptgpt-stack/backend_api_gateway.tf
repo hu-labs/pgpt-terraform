@@ -30,6 +30,7 @@ resource "aws_api_gateway_method" "post_chat" {
   api_key_required = true
 }
 
+// Primary communication between API Gateway and Lambda for chat endpoint
 resource "aws_api_gateway_integration" "post_chat_lambda" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.chat.id
@@ -37,10 +38,12 @@ resource "aws_api_gateway_integration" "post_chat_lambda" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
 
-  // $${stageVariables.lambdaAlias} escaped to send the stage variable to Lambda
-  uri = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.backend.arn}:$${stageVariables.lambdaAlias}/invocations"
+  // $${stageVariables.lambdaAlias} escaped (double $) to send the stage variable to Lambda
+  uri = "arn:aws:apigateway:${var.aws_region}:lambda:path/2021-11-15/functions/${aws_lambda_function.backend.arn}:$${stageVariables.lambdaAlias}/response-streaming-invocations"
+  //Buffered invoke: uri = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.backend.arn}:$${stageVariables.lambdaAlias}/invocations"
 
-  timeout_milliseconds = 29000
+  response_transfer_mode = "STREAM"
+  timeout_milliseconds = 300000       // 5 minutes, matching Lambda timeout
 }
 
 /*
@@ -132,10 +135,16 @@ resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 
   triggers = {
+    // What triggers a redeployment?
     redeployment = sha1(jsonencode([
       aws_api_gateway_resource.chat.id,
       aws_api_gateway_method.post_chat.id,
+
       aws_api_gateway_integration.post_chat_lambda.id,
+      aws_api_gateway_integration.post_chat_lambda.uri,                     // ---------------------------------
+      aws_api_gateway_integration.post_chat_lambda.response_transfer_mode,  // Added during text streaming step
+      aws_api_gateway_integration.post_chat_lambda.timeout_milliseconds,    // ---------------------------------
+
       aws_api_gateway_method.options_chat.id,
       aws_api_gateway_integration.options_mock.id,
       aws_api_gateway_integration_response.options_200.id,

@@ -16,7 +16,7 @@ resource "aws_lambda_function" "backend" {
   publish = true
 
   memory_size = 1024
-  timeout     = 20
+  timeout     = 300
 
   environment {
     variables = {

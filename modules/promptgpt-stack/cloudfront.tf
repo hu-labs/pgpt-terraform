@@ -54,10 +54,13 @@ resource "aws_cloudfront_distribution" "site" {
     domain_name = "${aws_api_gateway_rest_api.api.id}.execute-api.${var.aws_region}.amazonaws.com"
 
     custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "https-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
+      http_port               = 80
+      https_port              = 443
+      origin_protocol_policy  = "https-only"
+      origin_ssl_protocols    = ["TLSv1.2"]
+
+      // inactivity timeout between response chunks, intended for lambda behind API Gateway
+      origin_read_timeout     = 60
     }
 
     /*
