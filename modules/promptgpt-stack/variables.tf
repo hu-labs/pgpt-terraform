@@ -59,3 +59,15 @@ variable "github_environment" {
   description = "GitHub Environment name allowed to assume this deployment's AWS roles."
   type        = string
 }
+
+variable "cognito_extra_callback_urls" {
+  description = "Additional Cognito OAuth callback URLs, such as localhost for development."
+  type        = list(string)
+  default     = []
+}
+
+variable "cognito_extra_logout_urls" {
+  description = "Additional Cognito logout redirect URLs."
+  type        = list(string)
+  default     = []
+}

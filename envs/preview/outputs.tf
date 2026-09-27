@@ -1,3 +1,4 @@
+// DNS config
 output "acm_validation_records" {
   value = module.promptgpt.acm_validation_records
 }

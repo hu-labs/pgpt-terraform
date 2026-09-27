@@ -23,4 +23,18 @@ locals {
     Environment = var.environment
     ManagedBy   = "terraform"
   }
+
+  cognito_user_pool_name = "${var.name_prefix}-users"
+  cognito_client_name    = "${var.name_prefix}-web"
+  cognito_domain_prefix  = "${var.name_prefix}-auth"
+
+  // Construct cognito urls
+  cognito_callback_urls = concat(
+    ["https://${var.public_domain}/"],
+    var.cognito_extra_callback_urls
+  )
+  cognito_logout_urls = concat(
+    ["https://${var.public_domain}/"],
+    var.cognito_extra_logout_urls
+  )
 }

@@ -50,6 +50,14 @@ module "promptgpt" {
   github_org         = "hu-labs"
   frontend_repo      = "pgpt-frontend"
   backend_repo       = "pgpt-backend-lambda"
+
+  // Cognito calls from localhost for local development
+  cognito_extra_callback_urls = [
+    "http://localhost:5173/",
+  ]
+  cognito_extra_logout_urls = [
+    "http://localhost:5173/",
+  ]
 }
 
 // temporary variables to pass to the GHA helper module

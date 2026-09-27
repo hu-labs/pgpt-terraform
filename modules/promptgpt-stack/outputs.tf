@@ -78,3 +78,19 @@ output "backend_github_role_arn" {
   value = aws_iam_role.backend_deploy.arn
 }
 
+// Cognito
+output "cognito_user_pool_id" {
+  value = aws_cognito_user_pool.users.id
+}
+
+output "cognito_client_id" {
+  value = aws_cognito_user_pool_client.web.id
+}
+
+output "cognito_login_domain" {
+  value = "https://${aws_cognito_user_pool_domain.login.domain}.auth.${var.aws_region}.amazoncognito.com"
+}
+
+output "cognito_issuer" {
+  value = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.users.id}"
+}
