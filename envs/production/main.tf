@@ -60,6 +60,10 @@ locals {
     S3_BUCKET                  = module.promptgpt.frontend_bucket_name
     CLOUDFRONT_DISTRIBUTION_ID = module.promptgpt.cloudfront_distribution_id
     RELATIVE_API_URL           = module.promptgpt.relative_api_url
+    // COGNITO
+    COGNITO_USER_POOL_ID = module.promptgpt.cognito_user_pool_id
+    COGNITO_CLIENT_ID    = module.promptgpt.cognito_client_id
+    COGNITO_LOGIN_URL    = module.promptgpt.cognito_login_domain
   }
 
   backend_github_variables = {
