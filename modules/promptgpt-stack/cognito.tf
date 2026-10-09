@@ -31,7 +31,7 @@ resource "aws_cognito_user_pool_client" "web" {
   name         = local.cognito_client_name
   user_pool_id = aws_cognito_user_pool.users.id
 
-  // public client!
+  // public client
   generate_secret = false
 
   allowed_oauth_flows_user_pool_client = true
@@ -63,7 +63,7 @@ resource "aws_cognito_user_pool_domain" "login" {
   managed_login_version = 2
 }
 
-// With managed_login_version = 2, set your own 'themes'.
+// With managed_login_version = 2, set a custom 'themes'.
 // For now, use AWS's default Managed Login theme.
 resource "aws_cognito_managed_login_branding" "web" {
   user_pool_id = aws_cognito_user_pool.users.id

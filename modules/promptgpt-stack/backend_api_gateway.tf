@@ -16,7 +16,7 @@ resource "aws_api_gateway_rest_api" "api" {
   tags = local.common_tags
 }
 
-// Cognito
+// Cognito auth resource
 resource "aws_api_gateway_authorizer" "cognito" {
   name = "${var.name_prefix}-cognito-authorizer"
 
@@ -28,6 +28,9 @@ resource "aws_api_gateway_authorizer" "cognito" {
   identity_source = "method.request.header.Authorization"
 }
 
+/*
+    /CHAT endpoint
+*/
 resource "aws_api_gateway_resource" "chat" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -35,10 +38,13 @@ resource "aws_api_gateway_resource" "chat" {
 }
 
 resource "aws_api_gateway_method" "post_chat" {
-  rest_api_id      = aws_api_gateway_rest_api.api.id
-  resource_id      = aws_api_gateway_resource.chat.id
-  http_method      = "POST"
-  authorization    = "NONE"
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.chat.id
+  http_method = "POST"
+
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+
   api_key_required = true
 }
 
@@ -56,29 +62,6 @@ resource "aws_api_gateway_integration" "post_chat_lambda" {
 
   response_transfer_mode = "STREAM"
   timeout_milliseconds   = 300000 // 5 minutes, matching Lambda timeout
-}
-
-/*
-    Lambda invoke permissions
-*/
-resource "aws_lambda_permission" "allow_test_api_gateway" {
-  statement_id  = "allow-test-api-gateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.backend.function_name
-  qualifier     = aws_lambda_alias.test.name
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/test/POST/chat"
-}
-
-resource "aws_lambda_permission" "allow_prod_api_gateway" {
-  statement_id  = "allow-prod-api-gateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.backend.function_name
-  qualifier     = aws_lambda_alias.stable.name
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/prod/POST/chat"
 }
 
 /*
@@ -141,25 +124,56 @@ resource "aws_api_gateway_integration_response" "options_200" {
 }
 
 /*
+    Lambda invoke permissions
+*/
+resource "aws_lambda_permission" "allow_test_api_gateway" {
+  statement_id  = "allow-test-api-gateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.backend.function_name
+  qualifier     = aws_lambda_alias.test.name
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/test/POST/chat"
+}
+
+resource "aws_lambda_permission" "allow_prod_api_gateway" {
+  statement_id  = "allow-prod-api-gateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.backend.function_name
+  qualifier     = aws_lambda_alias.stable.name
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/prod/POST/chat"
+}
+
+/*
     Deployment
 */
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 
+
+  /*
+resource "aws_api_gateway_method" "post_chat" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  resource_id = aws_api_gateway_resource.chat.id
+
+*/
+
   triggers = {
     // What triggers a redeployment?
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.chat.id,
-      aws_api_gateway_method.post_chat.id,
+      aws_api_gateway_resource.chat,
+      aws_api_gateway_authorizer.cognito,
 
-      aws_api_gateway_integration.post_chat_lambda.id,
-      aws_api_gateway_integration.post_chat_lambda.uri,                    // ---------------------------------
-      aws_api_gateway_integration.post_chat_lambda.response_transfer_mode, // Added during text streaming step
-      aws_api_gateway_integration.post_chat_lambda.timeout_milliseconds,   // ---------------------------------
+      aws_api_gateway_method.post_chat,
+      aws_api_gateway_integration.post_chat_lambda,
 
-      aws_api_gateway_method.options_chat.id,
-      aws_api_gateway_integration.options_mock.id,
-      aws_api_gateway_integration_response.options_200.id,
+      aws_api_gateway_method.options_chat,
+      aws_api_gateway_method_response.options_200,
+
+      aws_api_gateway_integration.options_mock,
+      aws_api_gateway_integration_response.options_200,
     ]))
   }
 

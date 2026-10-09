@@ -70,3 +70,20 @@ output "public_domain" {
 output "relative_api_url" {
   value = module.promptgpt.relative_api_url
 }
+
+// Cognito
+output "cognito_user_pool_id" {
+  value = module.promptgpt.cognito_user_pool_id
+}
+
+output "cognito_client_id" {
+  value = module.promptgpt.cognito_client_id
+}
+
+output "cognito_login_domain" {
+  value = module.promptgpt.cognito_login_domain
+}
+
+output "cognito_issuer" {
+  value = module.promptgpt.cognito_issuer
+}
