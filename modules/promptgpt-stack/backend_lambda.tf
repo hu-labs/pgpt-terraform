@@ -20,13 +20,15 @@ resource "aws_lambda_function" "backend" {
 
   environment {
     variables = {
-      OPENAI_SECRET_ID = var.openai_secret_name
+      OPENAI_SECRET_ID    = var.openai_secret_name
+      DYNAMODB_TABLE_NAME = aws_dynamodb_table.conversations.name
     }
   }
 
   depends_on = [
     aws_iam_role_policy.lambda_logs,
     aws_iam_role_policy.openai_secret_read,
+    aws_iam_role_policy.lambda_conversations,
     aws_cloudwatch_log_group.lambda
   ]
 

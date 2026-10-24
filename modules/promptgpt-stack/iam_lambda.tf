@@ -68,3 +68,26 @@ resource "aws_iam_role_policy" "openai_secret_read" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "lambda_conversations" {
+  name = "${var.name_prefix}-lambda-conversations"
+  role = aws_iam_role.lambda_exec.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:Query",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:BatchWriteItem"
+        ]
+        Resource = aws_dynamodb_table.conversations.arn
+      }
+    ]
+  })
+}

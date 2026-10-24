@@ -94,3 +94,8 @@ output "cognito_login_domain" {
 output "cognito_issuer" {
   value = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.users.id}"
 }
+
+output "dynamodb_table_name" {
+  description = "Name of the conversations DynamoDB table."
+  value       = aws_dynamodb_table.conversations.name
+}
