@@ -23,6 +23,8 @@ This Terraform repository owns and manages the core AWS resources for a PromptGP
 - IAM roles and policies for Lambda execution, GitHub Actions deployment, and related access
 - ACM certificate validation records for the public CloudFront domain
 - CloudWatch log groups for Lambda logging
+- Cognito User Pool and Client
+- DynamoDB table for conversations (WIP)
 
 ## Structure
 
@@ -36,6 +38,8 @@ pgpt-terraform/
       backend_api_gateway.tf
       backend_lambda.tf
       cloudfront.tf
+      cognito.tf
+      dynamodb.tf
       frontend_s3.tf
       iam_github_actions.tf
       iam_lambda.tf
@@ -58,7 +62,6 @@ pgpt-terraform/
     deploy_name/
       main.tf                 => customize
       outputs.tf              => customize
-      backend.hcl             => constant
 ```
 
 ## Getting Started
@@ -70,10 +73,6 @@ pgpt-terraform/
 
 ### Prepare project specific files
 
-- `backend.hcl`:
-  ```
-  path = "terraform.tfstate"
-  ```
 - Customize `main.tf` and `outputs.tf`.
 
 ### Usage

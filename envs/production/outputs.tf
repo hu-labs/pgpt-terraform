@@ -87,3 +87,8 @@ output "cognito_login_domain" {
 output "cognito_issuer" {
   value = module.promptgpt.cognito_issuer
 }
+
+output "dynamodb_table_name" {
+  description = "Name of the conversations DynamoDB table."
+  value       = module.promptgpt.dynamodb_table_name
+}

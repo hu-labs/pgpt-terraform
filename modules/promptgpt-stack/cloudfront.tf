@@ -85,6 +85,8 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   ordered_cache_behavior {
+    // We can't just have CF Function rewrite the path
+    // because API Gateway itself needs to know the actual path
     path_pattern           = "/api/v1/*"
     target_origin_id       = local.backend_origin
     viewer_protocol_policy = "redirect-to-https"
