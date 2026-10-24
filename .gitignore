@@ -15,5 +15,6 @@ lambda-placeholder.zip
 
 docs/
 _old/
+envs/*/checkup-backend.sh
 
 response.json
