@@ -27,6 +27,14 @@ resource "aws_cloudfront_function" "rewrite_api_v1_to_prod" {
   code    = file("${path.module}/cloudfront/rewrite-api-v1-to-prod.js")
 }
 
+resource "aws_cloudfront_function" "frontend_routes" {
+  name    = "${var.name_prefix}-frontend-routes"
+  runtime = "cloudfront-js-2.0"
+  comment = "Serve the SPA for extensionless frontend routes"
+  publish = true
+  code    = file("${path.module}/cloudfront/frontend-routes.js")
+}
+
 resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -82,6 +90,11 @@ resource "aws_cloudfront_distribution" "site" {
     cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
 
     compress = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.frontend_routes.arn
+    }
   }
 
   ordered_cache_behavior {
@@ -103,18 +116,6 @@ resource "aws_cloudfront_distribution" "site" {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.rewrite_api_v1_to_prod.arn
     }
-  }
-
-  custom_error_response {
-    error_code         = 403
-    response_code      = 200
-    response_page_path = "/index.html"
-  }
-
-  custom_error_response {
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
   }
 
   viewer_certificate {

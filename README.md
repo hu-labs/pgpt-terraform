@@ -18,13 +18,13 @@ This Terraform repository owns and manages the core AWS resources for a PromptGP
 - S3 frontend bucket for the static site
 - CloudFront distribution with custom domain and certificate integration
 - Origin access control and caching behaviors for frontend and API traffic
-- API Gateway REST API with `/chat` route, CORS handling, usage plan, and API key
+- API Gateway REST API with `/chat`, `/threads`, and `/threads/{proxy+}` routes, Cognito authentication, CORS handling, usage plan, and API key
 - Lambda function for the backend application, plus `test` and `stable` aliases
 - IAM roles and policies for Lambda execution, GitHub Actions deployment, and related access
 - ACM certificate validation records for the public CloudFront domain
 - CloudWatch log groups for Lambda logging
 - Cognito User Pool and Client
-- DynamoDB table for conversations (WIP)
+- DynamoDB table for user-scoped conversations
 
 ## Structure
 
@@ -132,6 +132,23 @@ pgpt-terraform/
 
 ## Product Lifecycle (PGPT)
 
-Terraform manages the infra.
+Terraform manages the infrastructure.
 
 Frontend / backend code is shipped through CI/CD from their respective repositories.
+
+## Conversation API infrastructure checks
+
+Both thread resources use streaming Lambda proxy integrations with the same
+stage-selected alias as `/chat`. Their `OPTIONS` methods allow unauthenticated
+preflights; application methods require Cognito authentication and an API key.
+
+The default S3 cache behavior rewrites extensionless frontend navigation to
+`/index.html` through a CloudFront Function. The API behavior retains its own
+rewrite and preserves error statuses; global 403/404 substitutions are absent.
+
+Run the frontend routing checks with `node --test scripts/test-cloudfront.cjs`.
+Validate each environment from its own root with
+`terraform -chdir=envs/preview validate` or
+`terraform -chdir=envs/production validate`. Apply each environment separately.
+Terraform does not ship application code; GitHub Actions builds and
+deploys the Lambda bundle.

@@ -162,19 +162,72 @@ resource "aws_api_gateway_method" "post_chat" {
 
   triggers = {
     // What triggers a redeployment?
-    redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.chat,
-      aws_api_gateway_authorizer.cognito,
-
-      aws_api_gateway_method.post_chat,
-      aws_api_gateway_integration.post_chat_lambda,
-
-      aws_api_gateway_method.options_chat,
-      aws_api_gateway_method_response.options_200,
-
-      aws_api_gateway_integration.options_mock,
-      aws_api_gateway_integration_response.options_200,
-    ]))
+    // Hash configured inputs rather than provider-computed defaults, which can
+    // change on the first refresh and cause a redundant deployment.
+    redeployment = sha1(jsonencode({
+      resources = [
+        aws_api_gateway_resource.chat.id,
+        aws_api_gateway_resource.threads.id,
+        aws_api_gateway_resource.threads_proxy.id,
+      ]
+      authorizer = {
+        type            = aws_api_gateway_authorizer.cognito.type
+        provider_arns   = aws_api_gateway_authorizer.cognito.provider_arns
+        identity_source = aws_api_gateway_authorizer.cognito.identity_source
+      }
+      methods = [for method in concat(
+        [aws_api_gateway_method.post_chat, aws_api_gateway_method.options_chat],
+        values(aws_api_gateway_method.threads_any),
+        values(aws_api_gateway_method.threads_options),
+        ) : {
+        resource_id      = method.resource_id
+        http_method      = method.http_method
+        authorization    = method.authorization
+        authorizer_id    = method.authorizer_id
+        api_key_required = method.api_key_required
+      }]
+      streaming = [for integration in concat(
+        [aws_api_gateway_integration.post_chat_lambda],
+        values(aws_api_gateway_integration.threads_lambda),
+        ) : {
+        resource_id             = integration.resource_id
+        http_method             = integration.http_method
+        integration_http_method = integration.integration_http_method
+        type                    = integration.type
+        uri                     = integration.uri
+        response_transfer_mode  = integration.response_transfer_mode
+        timeout_milliseconds    = integration.timeout_milliseconds
+      }]
+      preflight = [for integration in concat(
+        [aws_api_gateway_integration.options_mock],
+        values(aws_api_gateway_integration.threads_options),
+        ) : {
+        resource_id          = integration.resource_id
+        http_method          = integration.http_method
+        type                 = integration.type
+        request_templates    = integration.request_templates
+        passthrough_behavior = integration.passthrough_behavior
+      }]
+      preflight_methods = [for response in concat(
+        [aws_api_gateway_method_response.options_200],
+        values(aws_api_gateway_method_response.threads_options),
+        ) : {
+        resource_id         = response.resource_id
+        http_method         = response.http_method
+        status_code         = response.status_code
+        response_parameters = response.response_parameters
+        response_models     = response.response_models
+      }]
+      preflight_responses = [for response in concat(
+        [aws_api_gateway_integration_response.options_200],
+        values(aws_api_gateway_integration_response.threads_options),
+        ) : {
+        resource_id         = response.resource_id
+        http_method         = response.http_method
+        status_code         = response.status_code
+        response_parameters = response.response_parameters
+      }]
+    }))
   }
 
   lifecycle {
@@ -182,6 +235,10 @@ resource "aws_api_gateway_method" "post_chat" {
   }
 
   depends_on = [
+    aws_api_gateway_integration.threads_lambda,
+    aws_api_gateway_integration_response.threads_options,
+    aws_lambda_permission.threads_test,
+    aws_lambda_permission.threads_prod,
     aws_api_gateway_integration.post_chat_lambda,
     aws_api_gateway_integration_response.options_200,
     aws_lambda_permission.allow_test_api_gateway,
