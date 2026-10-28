@@ -15,6 +15,7 @@ lambda-placeholder.zip
 
 docs/
 _old/
-envs/*/checkup-backend.sh
+envs/*/check-dynamo.sh
+envs/*/cognito-list.sh
 
 response.json
