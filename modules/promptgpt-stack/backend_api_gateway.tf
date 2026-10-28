@@ -29,136 +29,10 @@ resource "aws_api_gateway_authorizer" "cognito" {
 }
 
 /*
-    /CHAT endpoint
-*/
-resource "aws_api_gateway_resource" "chat" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
-  path_part   = "chat"
-}
-
-resource "aws_api_gateway_method" "post_chat" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.chat.id
-  http_method = "POST"
-
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
-
-  api_key_required = true
-}
-
-// Primary communication between API Gateway and Lambda for chat endpoint
-resource "aws_api_gateway_integration" "post_chat_lambda" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.chat.id
-  http_method             = aws_api_gateway_method.post_chat.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-
-  // $${stageVariables.lambdaAlias} escaped (double $) to send the stage variable to Lambda
-  uri = "arn:aws:apigateway:${var.aws_region}:lambda:path/2021-11-15/functions/${aws_lambda_function.backend.arn}:$${stageVariables.lambdaAlias}/response-streaming-invocations"
-  //Buffered invoke: uri = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.backend.arn}:$${stageVariables.lambdaAlias}/invocations"
-
-  response_transfer_mode = "STREAM"
-  timeout_milliseconds   = 300000 // 5 minutes, matching Lambda timeout
-}
-
-/*
-    OPTIONS/CORS
-*/
-resource "aws_api_gateway_method" "options_chat" {
-  rest_api_id      = aws_api_gateway_rest_api.api.id
-  resource_id      = aws_api_gateway_resource.chat.id
-  http_method      = "OPTIONS"
-  authorization    = "NONE"
-  api_key_required = false
-}
-
-resource "aws_api_gateway_method_response" "options_200" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.chat.id
-  http_method = aws_api_gateway_method.options_chat.http_method
-  status_code = "200"
-
-  response_models = {
-    "application/json" = "Empty"
-  }
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = true
-    "method.response.header.Access-Control-Allow-Methods" = true
-    "method.response.header.Access-Control-Allow-Headers" = true
-  }
-}
-
-resource "aws_api_gateway_integration" "options_mock" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.chat.id
-  http_method = aws_api_gateway_method.options_chat.http_method
-
-  type = "MOCK"
-
-  request_templates = {
-    "application/json" = "{\"statusCode\": 200}"
-  }
-
-  passthrough_behavior = "WHEN_NO_MATCH"
-}
-
-resource "aws_api_gateway_integration_response" "options_200" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.chat.id
-  http_method = aws_api_gateway_method.options_chat.http_method
-  status_code = aws_api_gateway_method_response.options_200.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin"  = "stageVariables.allowedOrigin"
-    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
-    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-  }
-
-  depends_on = [
-    aws_api_gateway_integration.options_mock
-  ]
-}
-
-/*
-    Lambda invoke permissions
-*/
-resource "aws_lambda_permission" "allow_test_api_gateway" {
-  statement_id  = "allow-test-api-gateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.backend.function_name
-  qualifier     = aws_lambda_alias.test.name
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/test/POST/chat"
-}
-
-resource "aws_lambda_permission" "allow_prod_api_gateway" {
-  statement_id  = "allow-prod-api-gateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.backend.function_name
-  qualifier     = aws_lambda_alias.stable.name
-  principal     = "apigateway.amazonaws.com"
-
-  source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/prod/POST/chat"
-}
-
-/*
     Deployment
 */
 resource "aws_api_gateway_deployment" "deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
-
-
-  /*
-resource "aws_api_gateway_method" "post_chat" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.chat.id
-
-*/
 
   triggers = {
     // What triggers a redeployment?
@@ -169,6 +43,8 @@ resource "aws_api_gateway_method" "post_chat" {
         aws_api_gateway_resource.chat.id,
         aws_api_gateway_resource.threads.id,
         aws_api_gateway_resource.threads_proxy.id,
+        aws_api_gateway_resource.presets.id,
+        aws_api_gateway_resource.presets_proxy.id,
       ]
       authorizer = {
         type            = aws_api_gateway_authorizer.cognito.type
@@ -176,9 +52,11 @@ resource "aws_api_gateway_method" "post_chat" {
         identity_source = aws_api_gateway_authorizer.cognito.identity_source
       }
       methods = [for method in concat(
-        [aws_api_gateway_method.post_chat, aws_api_gateway_method.options_chat],
+        [aws_api_gateway_method.chat_post, aws_api_gateway_method.chat_options],
         values(aws_api_gateway_method.threads_any),
         values(aws_api_gateway_method.threads_options),
+        values(aws_api_gateway_method.presets_any),
+        values(aws_api_gateway_method.presets_options),
         ) : {
         resource_id      = method.resource_id
         http_method      = method.http_method
@@ -187,8 +65,9 @@ resource "aws_api_gateway_method" "post_chat" {
         api_key_required = method.api_key_required
       }]
       streaming = [for integration in concat(
-        [aws_api_gateway_integration.post_chat_lambda],
+        [aws_api_gateway_integration.chat_lambda],
         values(aws_api_gateway_integration.threads_lambda),
+        values(aws_api_gateway_integration.presets_lambda),
         ) : {
         resource_id             = integration.resource_id
         http_method             = integration.http_method
@@ -199,8 +78,9 @@ resource "aws_api_gateway_method" "post_chat" {
         timeout_milliseconds    = integration.timeout_milliseconds
       }]
       preflight = [for integration in concat(
-        [aws_api_gateway_integration.options_mock],
+        [aws_api_gateway_integration.chat_options],
         values(aws_api_gateway_integration.threads_options),
+        values(aws_api_gateway_integration.presets_options),
         ) : {
         resource_id          = integration.resource_id
         http_method          = integration.http_method
@@ -209,8 +89,9 @@ resource "aws_api_gateway_method" "post_chat" {
         passthrough_behavior = integration.passthrough_behavior
       }]
       preflight_methods = [for response in concat(
-        [aws_api_gateway_method_response.options_200],
+        [aws_api_gateway_method_response.chat_options],
         values(aws_api_gateway_method_response.threads_options),
+        values(aws_api_gateway_method_response.presets_options),
         ) : {
         resource_id         = response.resource_id
         http_method         = response.http_method
@@ -219,8 +100,9 @@ resource "aws_api_gateway_method" "post_chat" {
         response_models     = response.response_models
       }]
       preflight_responses = [for response in concat(
-        [aws_api_gateway_integration_response.options_200],
+        [aws_api_gateway_integration_response.chat_options],
         values(aws_api_gateway_integration_response.threads_options),
+        values(aws_api_gateway_integration_response.presets_options),
         ) : {
         resource_id         = response.resource_id
         http_method         = response.http_method
@@ -239,10 +121,14 @@ resource "aws_api_gateway_method" "post_chat" {
     aws_api_gateway_integration_response.threads_options,
     aws_lambda_permission.threads_test,
     aws_lambda_permission.threads_prod,
-    aws_api_gateway_integration.post_chat_lambda,
-    aws_api_gateway_integration_response.options_200,
-    aws_lambda_permission.allow_test_api_gateway,
-    aws_lambda_permission.allow_prod_api_gateway,
+    aws_api_gateway_integration.presets_lambda,
+    aws_api_gateway_integration_response.presets_options,
+    aws_lambda_permission.presets_test,
+    aws_lambda_permission.presets_prod,
+    aws_api_gateway_integration.chat_lambda,
+    aws_api_gateway_integration_response.chat_options,
+    aws_lambda_permission.chat_test,
+    aws_lambda_permission.chat_prod,
   ]
 }
 /*
