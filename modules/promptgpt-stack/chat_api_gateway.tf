@@ -1,3 +1,4 @@
+/*
 moved {
   from = aws_api_gateway_method.post_chat
   to   = aws_api_gateway_method.chat_post
@@ -37,6 +38,7 @@ moved {
   from = aws_lambda_permission.allow_prod_api_gateway
   to   = aws_lambda_permission.chat_prod
 }
+*/
 
 resource "aws_api_gateway_resource" "chat" {
   rest_api_id = aws_api_gateway_rest_api.api.id
