@@ -18,13 +18,13 @@ This Terraform repository owns and manages the core AWS resources for a PromptGP
 - S3 frontend bucket for the static site
 - CloudFront distribution with custom domain and certificate integration
 - Origin access control and caching behaviors for frontend and API traffic
-- API Gateway REST API with `/chat`, `/threads`, and `/threads/{proxy+}` routes, Cognito authentication, CORS handling, usage plan, and API key
+- API Gateway REST API with `/chat`, `/threads`, `/threads/{proxy+}`, `/presets`, and `/presets/{proxy+}` routes, Cognito authentication, CORS handling, usage plan, and API key
 - Lambda function for the backend application, plus `test` and `stable` aliases
 - IAM roles and policies for Lambda execution, GitHub Actions deployment, and related access
 - ACM certificate validation records for the public CloudFront domain
 - CloudWatch log groups for Lambda logging
 - Cognito User Pool and Client
-- DynamoDB table for user-scoped conversations
+- DynamoDB table for user-scoped conversations and prompt presets
 
 ## Structure
 
@@ -37,6 +37,7 @@ pgpt-terraform/
       acm.tf
       backend_api_gateway.tf
       backend_lambda.tf
+      chat_api_gateway.tf
       cloudfront.tf
       cognito.tf
       dynamodb.tf
@@ -45,6 +46,8 @@ pgpt-terraform/
       iam_lambda.tf
       locals.tf
       outputs.tf
+      presets_api_gateway.tf
+      threads_api_gateway.tf
       variables.tf
       versions.tf
    github-actions-env/
@@ -136,11 +139,12 @@ Terraform manages the infrastructure.
 
 Frontend / backend code is shipped through CI/CD from their respective repositories.
 
-## Conversation API infrastructure checks
+## API infrastructure checks
 
-Both thread resources use streaming Lambda proxy integrations with the same
-stage-selected alias as `/chat`. Their `OPTIONS` methods allow unauthenticated
-preflights; application methods require Cognito authentication and an API key.
+Thread and preset resources use streaming Lambda proxy integrations with the
+same stage-selected alias as `/chat`. Their `OPTIONS` methods allow
+unauthenticated preflights; application methods require Cognito authentication
+and an API key.
 
 The default S3 cache behavior rewrites extensionless frontend navigation to
 `/index.html` through a CloudFront Function. The API behavior retains its own
